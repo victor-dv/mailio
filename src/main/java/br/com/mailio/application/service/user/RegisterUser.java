@@ -17,11 +17,20 @@ public class RegisterUser {
     public UserEntity execute(RegisterUserDto dto) {
         UserEntity user = new UserEntity();
         user.setName(dto.name());
+        user.setUsername(dto.username());
         user.setEmail(dto.email());
         user.setPassword(dto.password());
 
         String encodedPassword = passwordEncoder.encode(dto.password());
         user.setPassword(encodedPassword);
+
+        Boolean status = (dto.status() != null) ? dto.status() : true;
+        user.setStatus(status);
+
+        userRepository.findByUsernameOrEmail(dto.username(), dto.email())
+                .ifPresent(existingUser -> {
+                    throw new RuntimeException("Username ou email de usuário já está em uso");
+                });
 
         return userRepository.save(user);
     }

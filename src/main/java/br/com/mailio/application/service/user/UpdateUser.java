@@ -17,11 +17,12 @@ public class UpdateUser {
     public UserEntity execute(UUID id, UpdateUserDto dto) {
         var user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         user.setName(dto.name());
+        user.setUsername(dto.username());
 
-        userRepository.findByName(user.getName())
+        userRepository.findByUsername(dto.username())
                 .ifPresent(existingUser -> {
                     if (!existingUser.getId().equals(user.getId())) {
-                        throw new RuntimeException("Nome de usuário já está em uso");
+                        throw new RuntimeException("Username de usuário já está em uso");
                     }
                 });
         return userRepository.save(user);
