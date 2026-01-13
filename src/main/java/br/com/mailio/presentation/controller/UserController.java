@@ -1,7 +1,9 @@
 package br.com.mailio.presentation.controller;
 
+import br.com.mailio.application.dto.user.AuthRequestDto;
 import br.com.mailio.application.dto.user.RegisterUserDto;
 import br.com.mailio.application.dto.user.UpdateUserDto;
+import br.com.mailio.application.service.user.AuthUserService;
 import br.com.mailio.application.service.user.RegisterUser;
 import br.com.mailio.application.service.user.UpdateUser;
 import jakarta.validation.Valid;
@@ -20,11 +22,19 @@ public class UserController {
     private RegisterUser registerUser;
     @Autowired
     private UpdateUser updateUser;
+    @Autowired
+    private AuthUserService authUserService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterUserDto registerUserDto) {
         var result = registerUser.execute(registerUserDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthRequestDto authRequestDto) {
+        var token =this.authUserService.execute(authRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
     @PutMapping("/update/{id}")
