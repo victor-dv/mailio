@@ -1,4 +1,4 @@
-package br.com.mailio.infraestructure.security;
+package br.com.mailio.infraestructure.token;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

@@ -1,5 +1,6 @@
 package br.com.mailio.infraestructure.security;
 
+import br.com.mailio.infraestructure.token.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
