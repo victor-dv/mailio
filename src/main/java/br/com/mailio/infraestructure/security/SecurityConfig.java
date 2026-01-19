@@ -32,6 +32,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("api/user/**").permitAll();
+                    auth.requestMatchers("/login", "/oauth2/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, BasicAuthenticationFilter.class);
