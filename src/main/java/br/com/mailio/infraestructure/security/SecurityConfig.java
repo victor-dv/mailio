@@ -35,19 +35,21 @@ public class SecurityConfig {
                                 "/api/user/**",
                                 "/login/**",
                                 "/oauth2/**",
-                                "/oauth/success"
+                                "/oauth/**",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler((request, response, authentication) -> {
-                            response.sendRedirect("/oauth/success");
-                        })
-                )
+                .oauth2Login(oauth2 -> {
+                    oauth2.defaultSuccessUrl("https://www.google.com/", true);
+                })
+
+                .oauth2Client(oauth2 -> {})
                 .addFilterBefore(securityFilter, BasicAuthenticationFilter.class);
 
         return http.build();
     }
+
 
 
     @Bean

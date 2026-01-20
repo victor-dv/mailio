@@ -21,41 +21,52 @@ public class SecurityFilter extends OncePerRequestFilter {
     private JwtTokenService jwtTokenService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws IOException, ServletException {
-        String authHeader = request.getRequestURI();
-        if (authHeader.startsWith("/oauth2")
-                || authHeader.startsWith("/login")) {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws IOException, ServletException {
+
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/oauth2")
+                || path.startsWith("/login")
+                || path.startsWith("/oauth")) {
 
             filterChain.doFilter(request, response);
             return;
         }
 
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (authHeader != null) {
-            try {
-                String token = authHeader.replace("Bearer", "").trim();
-                String userId = jwtTokenService.validadeToken(token);
-                if (userId == null || userId.isEmpty()) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Token inválido ou expirado");
-                    return;
-                }
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } catch (Exception e) {
+        try {
+            String token = authHeader.replace("Bearer ", "").trim();
+            String userId = jwtTokenService.validadeToken(token);
+            if (userId == null || userId.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-                response.getWriter().write("Token inválido: " + e.getMessage());
-
+                response.getWriter().write("Token inválido ou expirado");
                 return;
             }
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            userId,
+                            null,
+                            Collections.emptyList()
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token inválido: " + e.getMessage());
+            return;
         }
         filterChain.doFilter(request, response);
     }
 }
+
