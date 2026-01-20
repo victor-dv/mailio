@@ -24,7 +24,14 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getRequestURI();
+        if (authHeader.startsWith("/oauth2")
+                || authHeader.startsWith("/login")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         if (authHeader != null) {
             try {

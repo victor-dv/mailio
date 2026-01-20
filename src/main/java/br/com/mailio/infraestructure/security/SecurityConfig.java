@@ -15,12 +15,12 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-
     @Autowired
     private SecurityFilter securityFilter;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
@@ -30,14 +30,25 @@ public class SecurityConfig {
                     config.setAllowedHeaders(List.of("*"));
                     return config;
                 }))
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("api/user/**").permitAll();
-                    auth.requestMatchers("/login", "/oauth2/**").permitAll();
-                    auth.anyRequest().authenticated();
-                })
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/user/**",
+                                "/login/**",
+                                "/oauth2/**",
+                                "/oauth/success"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("/oauth/success");
+                        })
+                )
                 .addFilterBefore(securityFilter, BasicAuthenticationFilter.class);
+
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
